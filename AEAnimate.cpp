@@ -30,7 +30,13 @@ class AEAnimator : public emp::web::Animate {
         doc << canvas;
         doc << GetToggleButton("Toggle");
         doc << GetStepButton("Step");
-        doc << "This is an artificial ecology simulating the population fluctuations occurring in a predator-prey relationship. The grey squares represent coyotes, and the brown squares represent cows. The coyotes reproduce a lot slower than than the cows do, but coyotes can eat cows to gain points (i.e., energy), thus speeding up reproduction. This relationship can be seen in the oscillations of population density (i.e., more cows leads to more coyotes, fewer cows leads to fewer coyotes).";
+        doc << "This is an artificial ecology simulating the population fluctuations \
+        occurring in a predator-prey relationship. The grey squares represent coyotes, \
+        and the brown squares represent cows. The coyotes reproduce a lot slower than \
+        than the cows do, but coyotes can eat cows to gain points (i.e., energy), thus \
+        speeding up reproduction. This relationship can be seen in the oscillations of \
+        population density (i.e., more cows leads to more coyotes, fewer cows leads to \
+        fewer coyotes).";
 
         Organism* my_cow = new Cow(&random, 0);
         Organism* my_coyote = new Coyote(&random, 0);

@@ -50,23 +50,31 @@ class OrgWorld : public emp::World<Organism> {
         return extOrg;
     }
 
-  /** @brief Updates the state of the world.
-  *
-  * First calls the base class Update() to process actions for each organism.
-  * Then it obtains a randomized schedule and processes each occupied slot.
-  * Additional world-specific update logic can be added where indicated.
-  */
-  void Update() {
-      emp::World<Organism>::Update();
-
+    /**
+     * @brief Processes each occupied organism.
+     *
+     * Randomly shuffles the indices of the population and calls the Process method 
+     * on each occupied organism with a parameter value of 100. This ensures that 
+     * the organisms are processed in a random order.
+     */
+    void CallProcess() {
       emp::vector<size_t> schedule = emp::GetPermutation(random, GetSize());
       for (int i : schedule) {
           if (!IsOccupied(i)) {continue;}
             else {
                 pop[i]->Process(100);
             }
-      }
+        }
+    }
 
+    /**
+     * @brief Reproduces organisms.
+     *
+     * Randomly shuffles the indices of the population and iterates through them to 
+     * selectively reproduce organisms. The reproduction logic (such as fitness 
+     * evaluation and creating offspring) is handled within the function.
+     */
+    void ReproduceOrgs() {
       emp::vector<size_t> schedule_rep = emp::GetPermutation(random, GetSize());
       for (int i : schedule_rep) {
         if (!IsOccupied(i)) {continue;}
@@ -77,8 +85,44 @@ class OrgWorld : public emp::World<Organism> {
             }
         }
       }
+    }
 
-      emp::vector<size_t> schedule_move = emp::GetPermutation(random, GetSize());
+    /**
+     * @brief Adds a new organism to the world.
+     *
+     * Inserts a new organism into the population at an appropriate location. 
+     * The function typically checks for an available slot and assigns the 
+     * organism pointer to that slot.
+     *
+     * @param new_org A pointer or reference to the organism to be added.
+     * @return bool Returns true if the organism was added successfully, false otherwise.
+     */
+    void AddOrg(emp::Ptr<Organism> extOrg, emp::WorldPosition wp) {
+        if (IsOccupied(wp)) {
+            emp::Ptr<Organism> wpOrg = pop[wp.GetIndex()];
+            emp::Ptr<Organism> winOrg = extOrg->Interact(wpOrg);
+            if (winOrg == extOrg) { // Make sure you're not trying to add an organism to a square that it already occupies.
+                AddOrgAt(extOrg, wp);
+            }
+        } else {
+            AddOrgAt(extOrg, wp);
+        } 
+    }
+
+    /**
+     * @brief Moves organisms within the world.
+     *
+     * Reassigns the positions of organisms in the population. This function might 
+     * shift organisms to remove gaps, to reallocate space for reproduction, or 
+     * to simulate movement within the environment.
+     *
+     * @param from The original index of the organism.
+     * @param to The new index for the organism.
+     * @return bool Returns true if the move was successful, false if the destination 
+     *              is already occupied or indices are out of bounds.
+     */
+    void MoveOrgs() {
+        emp::vector<size_t> schedule_move = emp::GetPermutation(random, GetSize());
       for (int i : schedule_move) {
         if (!IsOccupied(i)) {
             continue;
@@ -90,17 +134,25 @@ class OrgWorld : public emp::World<Organism> {
                 continue;
             }
             emp::WorldPosition wp = GetRandomNeighborPos(i);
-            if (IsOccupied(wp)) {
-                emp::Ptr<Organism> wpOrg = pop[wp.GetIndex()];
-                emp::Ptr<Organism> winOrg = extOrg->Interact(wpOrg);
-                if (winOrg == extOrg) { // Make sure you're not trying to add an organism to a square that it already occupies.
-                    AddOrgAt(extOrg, wp);
-                }
-            } else {
-                AddOrgAt(extOrg, wp);
-            } 
+            AddOrg(extOrg, wp);
         }
       }
+    }
+
+  /** @brief Updates the state of the world.
+  *
+  * First calls the base class Update() to process actions for each organism.
+  * Then it obtains a randomized schedule and processes each occupied slot.
+  * Additional world-specific update logic can be added where indicated.
+  */
+  void Update() {
+
+    emp::World<Organism>::Update();
+
+    CallProcess();
+    ReproduceOrgs();
+    MoveOrgs();
+
     }
 };
 

@@ -122,7 +122,7 @@ class OrgWorld : public emp::World<Organism> {
      *              is already occupied or indices are out of bounds.
      */
     void MoveOrgs() {
-        emp::vector<size_t> schedule_move = emp::GetPermutation(random, GetSize());
+      emp::vector<size_t> schedule_move = emp::GetPermutation(random, GetSize());
       for (int i : schedule_move) {
         if (!IsOccupied(i)) {
             continue;
